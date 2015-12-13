@@ -1,0 +1,16 @@
+<?php
+
+$config = array(
+  'accounts' => array(
+    array(
+      'server' => 'x1.travian.xx',
+      'username' => 'username',
+      'password' => 'password',
+      'modules' => array(
+        'autofarm' => array(
+          'enabled' => true
+        )
+      )
+    )
+  )
+);
