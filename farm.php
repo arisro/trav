@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Europe/Bucharest');
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
@@ -31,8 +33,9 @@ foreach ($config['accounts'] as $account) {
 
     sleep(rand(2,5));
     $attackFarmsIds = array();
+    $lastTime = time() - 30 * 60;
     foreach ($farmsList['farms'] as $farm) {
-      if (!$farm['isAttacked'] && $farm['prevAttack'] < 3) {
+      if (!$farm['isAttacked'] && $farm['prevAttack'] < 3 && $farm['prevAttackTime'] < $lastTime) {
         $attackFarmsIds[] = $farm['id'];
       }
     }
@@ -85,11 +88,20 @@ function getFarmsList($client, $headers) {
   $farmList['a'] = $form->filter('input[name=a]')->attr('value');
 
   $form->filter('tbody tr.slotRow')->each(function($node, $i) use (&$farmList) {
+    $time = $node->filter('td.lastRaid a')->text();
+    $actualTime = time();
+    if (stripos($time, 'astăzi') !== false) {
+      $actualTime = strtotime(date('d-m-Y') . str_replace('astăzi ', '', $time));
+    } else if (stripos($time, 'ieri') !== false) {
+      $actualTime = strtotime(date('d-m-Y') . str_replace('ieri ', '', $time) . '-1 day');
+    }
+
     $farmList['farms'][] = array(
       'name' => $node->filter('td.village a')->text(),
       'id' => preg_replace('/slot\[(.*?)\]/', '$1', $node->filter('td.checkbox input')->attr('name')),
       'isAttacked' => (bool) $node->filter('td.village img')->count(),
-      'prevAttack' => preg_replace('/.*?iReport(\d)/', '$1', $node->filter('td.lastRaid img')->first()->attr('class'))
+      'prevAttack' => preg_replace('/.*?iReport(\d)/', '$1', $node->filter('td.lastRaid img')->first()->attr('class')),
+      'prevAttackTime' => $actualTime
     );
   });
 
