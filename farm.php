@@ -9,7 +9,7 @@ use Symfony\Component\DomCrawler\Crawler;
 
 echo "Starting...\n";
 
-//sleep(rand(30, 100));
+sleep(rand(30, 100));
 
 $headers = array(
   'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -36,6 +36,7 @@ foreach ($config['accounts'] as $account) {
     $lastTime = time() - 30 * 60;
     foreach ($farmsList['farms'] as $farm) {
       if (!$farm['isAttacked'] && $farm['prevAttack'] < 3 && $farm['prevAttackTime'] < $lastTime) {
+        echo "Attacking " . $farm['name'] . " (" . $farm['id']. ").\n";
         $attackFarmsIds[] = $farm['id'];
       }
     }
@@ -65,7 +66,7 @@ function doLogin($client, $headers, $username, $password) {
   $response = $client->post('/dorf1.php', array(
       'headers' => $lHeaders,
       'form_params' => $data,
-      'debug' => true
+      'debug' => false
   ));
 
   $crawler = new Crawler($response->getBody()->getContents());
@@ -123,7 +124,7 @@ function doAttackFarms($client, $headers, $farmListId, $farmListA, $farmIds) {
   $response = $client->post('/build.php?gid=16&tt=99', [
       'headers' => $headers,
       'form_params' => $data,
-      'debug' => true
+      'debug' => false
   ]);
 
   return $response;
